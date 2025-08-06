@@ -12,7 +12,9 @@
 	cmd = code --wait --diff $LOCAL $REMOTE
 [user]
 	name = Tanner Bennett
-	email = tannerbennett@me.com
+	email = tb@datatheorem.io
+[safe]
+	directory = /Users/tanner
 [filter "media"]
 	required = true
 	clean = git media clean %f
