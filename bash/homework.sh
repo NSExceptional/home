@@ -1,0 +1,1 @@
+alias graph="dot -Tpng -O"

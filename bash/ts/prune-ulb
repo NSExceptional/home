@@ -1,0 +1,63 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * prune-ubl
+ * ts
+ *
+ * Created by Tanner Bennett on 2025-06-11
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import * as path from "jsr:@std/path";
+import parseArgs, { abort } from './args-usage.ts';
+import Command from "./command.ts";
+import $ from 'jsr:@david/dax';
+
+const args: {
+    r: boolean,
+} = parseArgs(
+    `usage: prune-ubl [-r]`,
+    'List (or remove) all text files in /usr/local/bin',
+);
+
+const remove = args.r;
+const allFiles = (await $`ls /usr/local/bin`.text())
+    .split('\n').filter(Boolean)
+    .map(file => path.join('/usr/local/bin', file));
+
+// No files have extensions in this folder,
+// so we look for files whose contents start
+// with the string "#!"
+const textFiles = allFiles.filter(file => {
+    const header = "#!/usr/bin/env node"
+    // Open each file and check if it starts with "#!".
+    // Don't read the whole file, just check the first few bytes.
+    const handle = Deno.openSync(file, { read: true });
+    const buffer = new Uint8Array(header.length);
+    const bytesRead = handle.readSync(buffer);
+    handle.close();
+
+    if (bytesRead === null || bytesRead < header.length) return false;
+
+    // Convert to string
+    const content = new TextDecoder().decode(buffer.subarray(0, bytesRead));
+    return content.startsWith(header);
+});
+
+if (remove) {
+    for (const file of textFiles) {
+        console.log(`Removing: ${file}`);
+        // Deno.removeSync(file);
+    }
+
+    await $`/opt/homebrew/bin/trash ${textFiles.join(' ')}`;
+}
+else {
+    if (textFiles.length === 0) {
+        console.log("No text files found.");
+    } else {
+        console.log("Text files found:");
+        for (const file of textFiles) {
+            console.log(file);
+        }
+    }
+}

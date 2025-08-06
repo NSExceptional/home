@@ -1,0 +1,56 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * cpdate
+ * ts
+ *
+ * Created by Tanner Bennett on 2025-05-09
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+
+import parseArgs from './args-usage.ts';
+
+const args: {
+    _: [string, string]
+} = parseArgs(
+    `usage: cpdate <file1> <file2>`,
+    'Copy the creation date from file 1 to file 2.'
+);
+
+const [file1, file2] = args._;
+
+const file1Stat = await Deno.stat(file1);
+if (!file1Stat) {
+    console.error(`Error: File 1 does not exist: ${file1}`);
+    Deno.exit(1);
+}
+const file2Stat = await Deno.stat(file2);
+if (!file2Stat) {
+    console.error(`Error: File 2 does not exist: ${file2}`);
+    Deno.exit(1);
+}
+const file1Date = file1Stat.birthtime;
+if (!file1Date) {
+    console.error(`Error: File 1 does not have a creation date: ${file1}`);
+    Deno.exit(1);
+}
+const file2Date = file2Stat.birthtime;
+if (!file2Date) {
+    console.error(`Error: File 2 does not have a creation date: ${file2}`);
+    Deno.exit(1);
+}
+
+const file2DateString = file2Date.toISOString();
+const file1DateString = file1Date.toISOString();
+const file2DateStringFormatted = file2DateString.replace(/T/, ' ').replace(/\..+/, '');
+const file1DateStringFormatted = file1DateString.replace(/T/, ' ').replace(/\..+/, '');
+console.log(`File 1: ${file1} (${file1DateStringFormatted})`);
+console.log(`File 2: ${file2} (${file2DateStringFormatted})`);
+console.log(`Copying creation date from file 1 to file 2...`);
+await Deno.run({
+    cmd: ['touch', '-t', file1DateStringFormatted, file2],
+}).status();
+console.log(`Done!`);
+console.log(`File 2: ${file2} (${file2DateStringFormatted})`);
+console.log(`File 1: ${file1} (${file1DateStringFormatted})`);
+console.log(`Creation date copied from file 1 to file 2.`);

@@ -1,0 +1,43 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * tag
+ * media
+ * 
+ * Created by Tanner Bennett on 2025-02-25
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import ffmpeg from './ffmpeg.ts';
+import ffprobe from './ffprobe.ts';
+import parseArgs from '../args-usage.ts';
+
+const args: {
+    _: [string]
+} = parseArgs(
+    `usage: tag <file>`,
+    'Tag an h265 / HEVC video file as hvc1.'
+);
+
+const [file] = args._;
+const info = await ffprobe.jsonInfo(file);
+
+// Check the video codec
+const codec = info.video?.codec_name;
+if (codec !== 'hevc') {
+    console.error(`Error: The video codec is not h.265/HEVC (found: ${codec}).`);
+    Deno.exit(1);
+}
+
+// Check the audio codec
+const audioCodec = info.audio?.codec_name;
+if (audioCodec && !['aac', 'mp3', 'opus'].includes(audioCodec)) {
+    console.error(`Error: The audio codec (${audioCodec}) may not be compatible with the target container.`);
+    Deno.exit(1);
+}
+
+// Check for subtitles
+if (info.hasSubtitles) {
+    console.warn('Warning: The file contains subtitles which may not be compatible with the target container.');
+}
+
+await ffmpeg.tag({ input: file });

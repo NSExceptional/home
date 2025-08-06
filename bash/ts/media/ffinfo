@@ -1,0 +1,80 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * heify
+ * media
+ *
+ * Created by Tanner Bennett on 2025-03-30
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import ffprobe from './ffprobe.ts';
+import parseArgs from '../args-usage.ts';
+
+// Some notes:
+// • AVC = h.264
+// • HEVC = h.265
+// • AV1 is marginally better than HEVC but not widely supported yet
+
+const args: {
+    v: string | undefined;
+    j: string | undefined;
+    o: string | undefined;
+    _: [string]
+} = parseArgs(
+    `usage: ffinfo [-v field] [-j outfile] <file>`,
+    'Get information about a video file.\n',
+    'By default, the codec, container, resolution, FPS, frame count, and duration are shown.',
+    'When -j is used, the full JSON output is written to the given file.',
+    'Pass -v to print a specific field of the video codec. Cannot be used with -j.'
+);
+
+const vfield = args.v;
+const outfile = args.j || args.o;
+const [file] = args._;
+
+const json = await ffprobe.jsonInfo(file);
+
+if (vfield) {
+    const vstream = json.video!;
+    console.log(vstream[vfield]);
+    Deno.exit(0);
+}
+
+if (outfile) {
+    try {
+        await Deno.writeTextFile(outfile, JSON.stringify(json, null, 2));
+    } catch (err) {
+        console.error(`Error writing JSON to ${outfile}:`, err);
+        Deno.exit(1);
+    }
+} else {
+    const vstream = json.video!;
+
+    const codec = vstream.codec_name;
+    const codec_long = vstream.codec_long_name || codec;
+    const container = json.format.format_name;
+    const container_long = json.format.format_long_name || container;
+    const hasHVC1 = vstream.codec_tag_string === 'hvc1';
+    const hasHEV1 = vstream.codec_tag_string === 'hev1';
+    const width = vstream.width;
+    const height = vstream.height;
+    const fps = vstream.avg_frame_rate;
+    const total_frames = vstream.nb_frames || (
+        // Call again with -count_frames if nb_frames missing
+        await ffprobe.jsonInfo(file, ['-count_frames'])
+    ).streams[0].nb_read_frames;
+
+    const duration = json.format.duration
+        ? new Date(json.format.duration * 1000).toISOString().slice(11, 19) // HH:MM:SS
+        : 'Unknown';
+
+    console.log(`Codec: ${codec} (${codec_long})`);
+    console.log(`Container: ${container} (${container_long})`);
+    console.log(`Resolution: ${width} x ${height}`);
+    console.log(`FPS: ${fps}`);
+    console.log(`Total Frames: ${total_frames}`);
+    console.log(`Duration: ${duration}`);
+    console.log(`hvc1: ${hasHVC1 ? '✓' : '𐄂'}`);
+    console.log(`hev1: ${hasHEV1 ? '✓' : '𐄂'}`);
+}
+

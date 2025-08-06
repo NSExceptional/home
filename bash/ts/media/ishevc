@@ -1,0 +1,41 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * ishevc
+ * media
+ *
+ * Created by Tanner Bennett on 2025-04-11
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import parseArgs from '../args-usage.ts';
+import MP4 from './mp4.ts';
+
+const args: {
+    _: [string, number?]
+} = parseArgs(
+    `usage: ishevc <file>`,
+    'foo'
+);
+
+const [file] = args._;
+const hasHVC1 = new MP4(file, true).hvc1;
+const hevcCodec = new MP4(file, true).hev1;
+
+console.log(hasHVC1 ? '✅ HVC1' : '❌ HVC1 not found');
+console.log(hevcCodec ? '✅ HEVC' : '❌ HEVC not found');
+
+// const buffer = new Uint8Array(1024 * 512); // Read first 512KB
+// const bytesRead = (await file.read(buffer)) ?? 0;
+// file.close();
+
+// const header = buffer.subarray(0, bytesRead);
+// const text = new TextDecoder('utf-8').decode(header);
+
+// debugger;
+
+// // Check for 'hvc1' or 'hev1' in the MP4 headers
+// if (text.includes('hvc1') || text.includes('hev1')) {
+//     console.log('✅ HEVC');
+// } else {
+//     console.log('❌ HEVC not found');
+// }

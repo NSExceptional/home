@@ -1,0 +1,68 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * ffcompare
+ * media
+ *
+ * Created by Tanner Bennett on 2025-02-02
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import ffmpeg from './ffmpeg.ts';
+import ffprobe from './ffprobe.ts';
+import parseArgs from '../args-usage.ts';
+
+const args: {
+    _: [...string[], number]
+} = parseArgs(
+    `usage: ffcompare <file1 file2 ...> <frame-count>`,
+    'Extracts N evenly distributed frames from a set of video files using ffmpeg.'
+);
+
+// Extract the frame count (last argument) and files (all previous arguments)
+const [frameCount, ...files] = args._.reverse() as [number, ...string[]]
+
+// Guard at least 2 files
+if (files.length < 2) {
+    console.error('Error: At least 2 files must be provided.');
+    Deno.exit(1);
+}
+
+// Guard no duplicate files
+const uniqueFiles = new Set(files);
+if (uniqueFiles.size !== files.length) {
+    console.error('Error: Duplicate files provided. All files must be different.');
+    Deno.exit(1);
+}
+
+// Get duration of all files
+const durations = await Promise.all(
+    files.map(file => ffprobe.duration(file))
+);
+
+const maxDuration = Math.max(...durations);
+const minDuration = Math.min(...durations);
+const durationDifference = maxDuration - minDuration;
+
+if (durationDifference > (maxDuration * 0.01)) {
+    console.error('Error: All files must have the same duration within 1%.');
+    files.forEach((file, index) => {
+        console.error(`Duration of ${file}: ${durations[index]}`);
+    });
+    Deno.exit(1);
+}
+
+// Get number of frames in each file
+const frameCounts = await Promise.all(
+    files.map(file => ffprobe.totalFrames(file, true))
+);
+
+// Use the largest frame count when extracting frames
+const totalFrames = Math.max(...frameCounts);
+const sharedOptions = { frames: frameCount, totalFrames };
+
+// Extract frames from all files
+const inFolders = files.length > 2;
+for (const file of files) {
+    await ffmpeg.extractNFrames({ ...sharedOptions, input: file, inFolders }).catch(console.error);
+    // await ffmpeg.moveFramesToFolders({ ...sharedOptions, input: file, inFolders }).catch(console.error);
+}

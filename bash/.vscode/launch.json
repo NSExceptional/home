@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Deno",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${fileDirname}",
+            // "cwd": "/Users/tanner/Desktop/testing",
+            "runtimeExecutable": "deno",
+            "runtimeArgs": [
+                "run", "--inspect-brk", "-A", "${file}",
+                // "test.mkv"
+                // "test.mp4",
+                // "30"
+                // "gooning.h265-15.mov", "gooning.h265-19.mov", "gooning.h265-23.mov", "gooning.mov",
+                "/Users/tanner/bash/ts/media/hevc-h265.mp4"
+                // "/Users/tanner/bash/ts/media/hevc-h265.hvc1.mp4"
+                // "/Users/tanner/Desktop/1036947856664415488.mp4"
+                // "/Users/tanner/Desktop/TikTok"
+                // "/Users/tanner/Desktop/swift.org.png"
+                // "test.mov",
+                // "test.h265.mp4",
+            ],
+            "attachSimplePort": 9229,
+            "outputCapture": "std",
+            "localRoot": "${fileDirname}",
+            // "remoteRoot": "${fileDirname}/..",
+        }
+    ]
+}

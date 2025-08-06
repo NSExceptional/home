@@ -1,0 +1,40 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * heify
+ * media
+ *
+ * Created by Tanner Bennett on 2025-02-25
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import ffmpeg from './ffmpeg.ts';
+import parseArgs from '../args-usage.ts';
+import $ from 'jsr:@david/dax';
+
+// Some notes:
+// • AVC = h.264
+// • HEVC = h.265
+// • AV1 is marginally better than HEVC but not widely supported yet
+
+const args: {
+    r?: boolean
+    _: [string, number?],
+} = parseArgs(
+    `usage: heify <file> [-r] [crf-quality]`,
+    'Convert any video file to an h265 / HEVC MP4.'
+);
+
+const replace = args.r;
+const [input, crf] = args._;
+const outfile = await ffmpeg.h26ify({ input, crf });
+
+if (replace) {
+    if ($.commandExistsSync('trash')) {
+        await $`trash ${input}`;
+    } else {
+        console.error('"trash" command not available; saving original as .bak');
+        await $`mv ${input} ${input}.bak`;
+    }
+
+    await $`mv ${outfile} ${input}`;
+}

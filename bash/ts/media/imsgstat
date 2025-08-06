@@ -1,0 +1,152 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * imsgstat
+ * media
+ *
+ * Created by Tanner Bennett on 2025-04-10
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import ffprobe from './ffprobe.ts';
+import parseArgs from '../args-usage.ts';
+import MP4 from "./mp4.ts";
+
+type VideoInfo = {
+    path: string,
+    name: string,
+    size: number,
+    hevc: boolean,
+    date: number,
+};
+
+const args: {
+    p?: boolean,
+    _: [string],
+} = parseArgs(
+    `usage: imsgstat [-p] [inputFile]`,
+    'Get statistics about all video files in the iMessage attachments folder.',
+    'You may pass in a previous output file to skip processing.',
+    'Pass -p to open the output file in PlistEdit Pro instead.',
+);
+
+const workingFile = await getWorkingFile();
+
+if (args.p) {
+    await new Deno.Command(
+        '/usr/bin/open', { args: ['-a', 'PlistEdit Pro', workingFile], },
+    ).spawn();
+}
+else {
+    doHeuristicsOnFile(workingFile);
+}
+
+async function getWorkingFile(): Promise<string> {
+    return args._[0] || await processAttachments();
+}
+
+async function processAttachments(): Promise<string> {
+    // Get the home folder using syscall
+    const homeFolder = Deno.env.get('HOME');
+    if (!homeFolder) {
+        throw new Error('Could not get home folder');
+    }
+
+    // Get the iMessage attachments folder
+    const imsgFolder = `${homeFolder}/Library/Messages/Attachments`;
+
+    // Recursively search for all video files and record the full file paths
+    const videoFiles: string[] = [];
+    async function findVideoFiles(folder: string) {
+        for await (const entry of Deno.readDir(folder)) {
+            const fullPath = `${folder}/${entry.name}`;
+            if (entry.isDirectory) {
+                await findVideoFiles(fullPath);
+            } else if (entry.isFile && /\.(mov|mp4|m4v|avi|mkv|wmv)$/i.test(entry.name)) {
+                videoFiles.push(fullPath);
+            }
+        }
+    }
+
+    console.log('Searching...');
+    await findVideoFiles(imsgFolder);
+
+    // Get the video file info
+    console.log('Processing...');
+    ffprobe.quiet = true;
+    const infos: VideoInfo[] = await Promise.all(videoFiles.map(async (file) => {
+
+        // Get file size with syscall
+        const stats = await Deno.stat(file);
+        const size = stats.size;
+        const sizeMB = size / (1024 * 1024);
+
+        const date = stats.birthtime
+            ? Math.floor(stats.birthtime.getTime() / 1000)
+            : 0;
+
+        return {
+            path: file,
+            name: file.split('/').pop()!,
+            // codec: info.streams[0].codec_name,
+            // resolution: `${info.streams[0].width}x${info.streams[0].height}`,
+            // duration: info.format.duration,
+            hevc: new MP4(file, true).hvc1,
+            size: Math.round(sizeMB * 10) / 10,
+            // Store the date as a unix timestamp (seconds)
+            date
+            // date: Math.floor(new Date(info.format.start_time).getTime() / 1000),
+        };
+    }));
+
+    infos.sort((a, b) => b.size - a.size);
+    const totalSize_MB = infos.reduce((total, info) => total + info.size, 0);
+
+    console.log(`Found ${infos.length} videos totaling ${totalSize_MB.toFixed(2)} MB`)
+
+    // Save file to temp folder and open with PlistEdit Pro
+    const tempFile = await Deno.makeTempFile({ suffix: '.json' });
+    await Deno.writeTextFile(tempFile, JSON.stringify(infos, null, 2));
+    console.log(`Wrote statistics to\n${tempFile}`);
+
+    return tempFile;
+}
+
+function doHeuristicsOnFile(file: string) {
+    // Read the file containing iMessage attachment info
+    const data: VideoInfo[] = JSON.parse(Deno.readTextFileSync(file));
+    const hevcVideos = data.filter(info => info.hevc);
+    const eligibleVideos = data.filter(info => !info.hevc);
+
+    // Get the total size
+    const totalSize = data.reduce((total: number, info) => total + info.size, 0);
+    const hevcSize = hevcVideos.reduce((total: number, info) => total + info.size, 0);
+    const eligibleSize = totalSize - hevcSize;
+    const eligiblePercentage = (eligibleSize / totalSize) * 100;
+
+    console.log(`Number of videos: ${data.length}`);
+    console.log(`Number of HEVC videos: ${hevcVideos.length}`);
+    console.log(`Number of videos eligible for conversion (EVs): ${eligibleVideos.length}`);
+    console.log(`Total size of videos: ${Math.round(totalSize * 10) / 10} MB`);
+    console.log(`Size of HEVC videos: ${Math.round(hevcSize * 10) / 10} MB`);
+    console.log(`Size of EVs: ${Math.round(eligibleSize * 10) / 10} MB`);
+    console.log(`Percentage of EVs: ${eligiblePercentage.toFixed(2)}%`);
+
+    // Find out how many videos make up 50%, 75%, and 90% of the eligible size
+    const thresholds = [0.5, 0.75, 0.9].map(percentage => eligibleSize * percentage);
+    const counts = thresholds.map(threshold => {
+        let cumulativeSize = 0;
+        return eligibleVideos.reduce((count, info) => {
+            cumulativeSize += info.size;
+            return cumulativeSize <= threshold ? count + 1 : count;
+        }, 0);
+    });
+
+    console.log(`EVs making up 50%: ${counts[0]}`);
+    console.log(`EVs making up 75%: ${counts[1]}`);
+    console.log(`EVs making up 90%: ${counts[2]}`);
+
+    // Print the date and path of the newest video:
+    const newestVideo = data.filter(v => !v.hevc).reduce((newest, info) => info.date > newest.date ? info : newest);
+    console.log(`Newest eligible video: ${newestVideo.name} (${new Date(newestVideo.date * 1000).toLocaleString()})`);
+    console.log(`Path: ${newestVideo.path}`);
+}

@@ -1,0 +1,98 @@
+#!/usr/bin/env -S deno run -A --ext=ts
+/*
+ * inuse
+ * ts
+ *
+ * Created by Tanner Bennett on 2025-05-12
+ * Copyright © 2025 Tanner Bennett. All rights reserved.
+ */
+
+import * as path from "jsr:@std/path";
+import parseArgs, { abort } from './args-usage.ts';
+import Command from "./command.ts";
+import $ from 'jsr:@david/dax';
+
+const args: {
+    _: [string]
+} = parseArgs(
+    `usage: inuse <volume>`,
+    'Prints the processes using a given volume, if any.',
+);
+
+type fuser_access = {
+    pid: number;
+    name: string;
+};
+
+class fuser extends Command {
+    static shared = new fuser();
+
+    constructor() {
+        super('fuser');
+    }
+
+    async check(path: string): Promise<fuser_access[]> {
+        const output = await this.spawn([path]);
+        if (output === '') {
+            return [];
+        }
+
+        const processes = output.split(' ');
+
+        const results: fuser_access[] = await Promise.all(
+            processes.map(async fpid => {
+                const pid = parseInt(fpid, 10);
+                const name = await this.nameForPID(pid);
+                return { pid, name };
+            })
+        );
+
+        return results;
+    }
+
+    async nameForPID(pid: number): Promise<string> {
+        return await $`ps -p ${pid} -o comm=`.text();
+    }
+}
+
+let volume = args._[0];
+// if (!volume.startsWith('/Volumes')) {
+//     volume = path.join('/Volumes', volume);
+// }
+
+// Invoke fuser
+const o1 = await fuser.shared.check(volume);
+// Wait 1 second and then run it again
+await new Promise(resolve => setTimeout(resolve, 1000));
+const o2 = await fuser.shared.check(volume);
+
+// Discard any processes that are not in both outputs
+const inUse = o1.filter(o1Process => {
+    return o2.some(o2Process => {
+        return o1Process.pid === o2Process.pid;
+    });
+});
+
+// Print the processes
+if (inUse.length > 0) {
+    inUse.forEach(proc => {
+        console.log(`PID: ${proc.pid}, Name: ${proc.name}`);
+    });
+}
+else {
+    console.log(`No processes using ${volume}`);
+}
+
+if (confirm('killall?')) {
+    for (const proc of inUse) {
+        if (proc.name.startsWith('-')) continue;
+
+        try {
+            console.log(`> killall ${proc.name}`);
+            await $`killall ${proc.name}`;
+        }
+        catch (error) {
+            console.error(`Failed to kill ${proc.name}`, error);
+        }
+    }
+}
