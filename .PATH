@@ -1,0 +1,66 @@
+#
+#  .PATH
+#  tanner
+#  
+#  Created by Tanner Bennett on 2017-01-25
+#  Copyright © 2024 Tanner Bennett. All rights reserved.
+#
+
+if [[ ! $_PATH ]]; then
+    export _PATH="$PATH"
+else
+    PATH="$_PATH"
+fi
+
+addpath /usr/local/bin
+
+# My bin folder
+addpath "~/bin"
+addpath "~/bash/ts"
+addpath "~/bash/ts/media"
+
+# Launch services
+addpath "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/"
+
+# Python
+# The orginal version is saved in .bash_profile.pysave
+addpath "/Library/Frameworks/Python.framework/Versions/3.4/bin"
+addpath "/Library/Frameworks/Python.framework/Versions/2.7/bin"
+
+# Misc paths
+addpath "~/bin/maven/bin"
+addpath "~/bin/Tectonicus"
+addpath "/usr/local/mysql/bin"
+
+# Homebrew
+addpath "/usr/local/sbin"
+addpath "/opt/homebrew/bin"
+addpath "/opt/homebrew/opt/binutils/bin"
+export HOMEBREW_GITHUB_API_TOKEN=$HOMEBREW_GITHUB_API_TOKEN
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# iOSOpenDev
+export iOSOpenDevPath=/opt/iOSOpenDev
+export iOSOpenDevDevice=
+addpath "/opt/iOSOpenDev/bin"
+
+# THEOS
+export THEOS=/opt/theos
+addpath $THEOS/bin
+addpath "~/bin/cycript"
+
+# TexLive
+addpath "/Library/TeX/texlive/2021/bin/universal-darwin"
+
+# Rust
+addpath "~/.cargo/bin"
+
+# Apps
+addpath "/Applications/Hopper.app/Contents/MacOS/"
+addpath "/Applications/IDA Pro/ida64.app/Contents/MacOS/"
+addpath "/Applications/IDA Pro/ida.app/Contents/MacOS/"
+
+# JS dev
+addpath "~/.deno/bin"
+
+addpath /usr/local/opt/ruby/bin

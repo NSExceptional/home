@@ -1,0 +1,20 @@
+DISABLED_WARNINGS  = -Wnon-modular-include-in-framework-module
+DISABLED_WARNINGS += -Wno-trigraphs -Wno-missing-field-initializers
+DISABLED_WARNINGS += -Wno-missing-prototypes -Wno-missing-braces -Wswitch
+DISABLED_WARNINGS += -Wunreachable-code -Werror=deprecated-objc-isa-usage
+DISABLED_WARNINGS += -Wunused-function -Wno-unused-label -Wno-shadow
+DISABLED_WARNINGS += -Wno-unused-parameter -Wno-unused-variable
+DISABLED_WARNINGS += -Wno-unknown-pragmas -Wparentheses -Wno-conversion
+DISABLED_WARNINGS += -Wno-four-char-constants -Wno-int-conversion
+DISABLED_WARNINGS += -Wbool-conversion -Wenum-conversion
+DISABLED_WARNINGS += -Wno-float-conversion -Wnon-literal-null-conversion
+DISABLED_WARNINGS += -Wobjc-literal-conversion -Wshorten-64-to-32
+DISABLED_WARNINGS += -Wno-newline-eof -Wno-sign-conversion
+DISABLED_WARNINGS += -Wblock-capture-autoreleasing -Wcomma
+DISABLED_WARNINGS += -Winfinite-recursion -Wno-deprecated-declarations
+DISABLED_WARNINGS += -Wno-objc-property-no-attribute -Wpointer-sign
+DISABLED_WARNINGS += -Wunguarded-availability -fno-common
+DISABLED_WARNINGS += -Wno-incompatible-pointer-types-discards-qualifiers
+
+export ADDITIONAL_CFLAGS = $(DISABLED_WARNINGS)
+GO_EASY_ON_ME=1

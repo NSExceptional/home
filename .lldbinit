@@ -1,0 +1,8 @@
+# command script import /usr/local/opt/chisel/libexec/fblldb.py
+
+# UIKit import is broken at this point, moved to user breakpoints in Xcode
+#e @import Foundation
+#e @import UIKit
+
+settings set target.x86-disassembly-flavor intel
+command script import ~/bin/tblldb.py

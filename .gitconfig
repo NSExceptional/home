@@ -1,0 +1,34 @@
+[core]
+	excludesfile = /Users/tanner/.gitignore_global
+	autocrlf = input
+	editor = code --wait
+[merge]
+	tool = vscode
+[mergetool "vscode"]
+	cmd = code --wait $MERGED
+[diff]
+	tool = vscode
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+[user]
+	name = Tanner Bennett
+	email = tannerbennett@me.com
+[filter "media"]
+	required = true
+	clean = git media clean %f
+	smudge = git media smudge %f
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[push]
+	default = simple
+[alias]
+	stash-unapply = !git stash show -p | git apply -R
+[hub]
+	protocol = https
+[init]
+	defaultBranch = master
+[pull]
+	rebase = true

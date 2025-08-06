@@ -1,0 +1,37 @@
+# Ignore everything by default
+*
+
+# Whitelist specific files and folders
+!bash
+!bash/**
+
+!.gitignore
+!.bash_profile
+!.bashrc
+!.cyinit.cy
+!.gitconfig
+!.lldbinit
+!.PATH
+!.profile
+!.theosrc
+!.zshrc
+
+# Ignore extensions folder inside .vscode within the bash/ directory
+# bash/.vscode/extensions
+
+# Ignore any `extensions` folder inside `.vscode` across all directories
+**/.vscode/extensions
+
+# Ignore all media
+*.mp4
+*.mkv
+*.mov
+
+# Misc
+*.lock
+*.log
+*.zip
+
+# File system files
+.DS_Store
+Thumbs.db
