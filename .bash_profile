@@ -75,4 +75,4 @@ if [[ $PWD == $(realpath ~) ]]; then
 fi
 
 __mark End
-. "/Users/tanner/.deno/env"
+# . "/Users/tanner/.deno/env"

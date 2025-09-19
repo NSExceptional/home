@@ -26,6 +26,7 @@ addpath "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Fram
 # The orginal version is saved in .bash_profile.pysave
 addpath "/Library/Frameworks/Python.framework/Versions/3.4/bin"
 addpath "/Library/Frameworks/Python.framework/Versions/2.7/bin"
+addpath "/Users/tanner/Library/Python/3.9/bin"
 
 # Misc paths
 addpath "~/bin/maven/bin"
@@ -63,4 +64,5 @@ addpath "/Applications/IDA Pro/ida.app/Contents/MacOS/"
 # JS dev
 addpath "~/.deno/bin"
 
-addpath /usr/local/opt/ruby/bin
+addpath /opt/homebrew/opt/ruby/bin
+addpath /opt/homebrew/lib/ruby/gems/3.4.0/bin
