@@ -4,5 +4,5 @@
 #e @import Foundation
 #e @import UIKit
 
-settings set target.x86-disassembly-flavor intel
-command script import ~/bin/tblldb.py
+# settings set target.x86-disassembly-flavor intel
+# command script import ~/bin/tblldb.py
