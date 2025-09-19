@@ -24,6 +24,11 @@ Library/Application\ Support/*
 !Library/Application\ Support/BetterTouchTool/**
 .dat.nosync*
 
+# BTT AppleScripts
+!bin
+!bin/btt
+!bin/btt/**
+
 # Ignore extensions folder inside .vscode within the bash/ directory
 # bash/.vscode/extensions
 
