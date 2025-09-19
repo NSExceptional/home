@@ -16,6 +16,14 @@
 !.theosrc
 !.zshrc
 
+# BetterTouchTool settings
+!Library
+!Library/Application\ Support
+Library/Application\ Support/*
+!Library/Application\ Support/BetterTouchTool
+!Library/Application\ Support/BetterTouchTool/**
+.dat.nosync*
+
 # Ignore extensions folder inside .vscode within the bash/ directory
 # bash/.vscode/extensions
 
@@ -31,6 +39,9 @@
 *.lock
 *.log
 *.zip
+*-wal
+*-shm
+Logs/
 
 # File system files
 .DS_Store
