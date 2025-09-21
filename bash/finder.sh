@@ -85,3 +85,7 @@ gif2mp4() {
     local filename=`basename $1 .gif`
     ffmpeg -i "$1" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "$filename.mp4"
 }
+
+walify() {
+    sqlite3 "$1" "PRAGMA wal_checkpoint(TRUNCATE);"
+}
