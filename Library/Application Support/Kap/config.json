@@ -1,0 +1,21 @@
+{
+	"kapturesDir": "/Users/tanner/Desktop",
+	"allowAnalytics": true,
+	"showCursor": true,
+	"highlightClicks": false,
+	"hideDesktopIcons": false,
+	"record60fps": false,
+	"loopExports": true,
+	"doNotDisturb": false,
+	"recordAudio": false,
+	"audioInputDeviceId": "SYSTEM_DEFAULT",
+	"cropper": {},
+	"actionBar": {},
+	"lossyCompression": false,
+	"enableShortcuts": true,
+	"shortcuts": {
+		"triggerCropper": ""
+	},
+	"version": "3.6.0",
+	"recordKeyboardShortcut": true
+}
