@@ -1,0 +1,3 @@
+[submodule "Repos/bin/bgiparser"]
+	path = Repos/bin/bgiparser
+	url = https://github.com/mnrkbys/bgiparser.git
