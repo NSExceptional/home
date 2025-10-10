@@ -2,6 +2,8 @@
 
 alias cfm="clang-format -i"
 
+alias pipi="pip3 install --break-system-packages"
+
 # Expands a possibly relative path into an absolute path
 abs() {
     local path="$1"
