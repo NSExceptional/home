@@ -2,6 +2,10 @@
 
 alias bk="cd - > /dev/null"
 
+qfree() {
+    xattr -dr com.apple.quarantine "$@"
+}
+
 # Make a shortcut to the current path in my shortcuts folder
 scut() {
     local cur=`pwd`
