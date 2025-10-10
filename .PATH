@@ -24,9 +24,9 @@ addpath "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Fram
 
 # Python
 # The orginal version is saved in .bash_profile.pysave
-addpath "/Library/Frameworks/Python.framework/Versions/3.4/bin"
-addpath "/Library/Frameworks/Python.framework/Versions/2.7/bin"
-addpath "/Users/tanner/Library/Python/3.9/bin"
+# addpath "/Library/Frameworks/Python.framework/Versions/3.4/bin"
+# addpath "/Library/Frameworks/Python.framework/Versions/2.7/bin"
+# addpath "/Users/tanner/Library/Python/3.9/bin"
 
 # Misc paths
 addpath "~/bin/maven/bin"
@@ -66,3 +66,6 @@ addpath "~/.deno/bin"
 
 addpath /opt/homebrew/opt/ruby/bin
 addpath /opt/homebrew/lib/ruby/gems/3.4.0/bin
+
+# Pip stuff
+addpath /Users/tanner/Library/Python/3.13/bin
